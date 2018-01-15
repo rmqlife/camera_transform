@@ -41,6 +41,26 @@ def get_camera_pose(R,t):
     co = np.dot(R.T,(0,0,1))
     return cp, co
 
+def cam_to_world(R,t,p):
+    print("cam_to_world")
+    MV = np.hstack((R,t))
+    MV = np.vstack((MV,(0,0,0,1)))
+    p = np.hstack((p,1))
+    print(p)
+    from numpy.linalg import inv
+    p = np.dot(inv(MV),p)
+    print(p)
+    p = p[:3]/p[3]
+    print(p)
+    return p
+    
+def get_hand_pose(R,t):
+    hand_left=[-0.08309672027826309, 0.13976304233074188, 0.39112165570259094]
+    hand_right=[0.09550348855555058, 0.1327906884253025, 0.42547494173049927]
+    hand_left = cam_to_world(R,t,hand_left)
+    hand_right = cam_to_world(R,t,hand_right)
+    return hand_left,hand_right
+    
 R = [ 2.3378803662741476e-02, 9.9967347165206788e-01,
 1.0314146324401974e-02, 7.8244732224413349e-01,
 -1.1874935764705663e-02, -6.2260354465226841e-01,
@@ -52,16 +72,17 @@ import numpy as np
 R = np.array(R).reshape((3,3))
 t = np.array(t).reshape((3,1))
 cp, co = get_camera_pose(R,t)
-
+hand_left, hand_right = get_hand_pose(R,t)
 fig, ax = canvas()
 import numpy as np
 robot_pos = np.load('robot_arms.npy')
-print(robot_pos.shape)
     
 #ax.scatter(j1z,j1x,j1y)
 # draw_vector(ax,joints_react[0,:],joints_react[-2,:])    
 draw_point(ax, cp, c='r')
 draw_point(ax, cp-co, c='b')
+draw_point(ax, hand_left, c='y')
+draw_point(ax, hand_right, c='g')
 draw_points(ax, robot_pos[:,:3])
 draw_points(ax, robot_pos[:,-3:])
 plt.show()
