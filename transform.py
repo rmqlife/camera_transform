@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
+import numpy as np
 def canvas():
     fig = plt.figure()
     ax = p3.Axes3D(fig)
@@ -8,9 +9,9 @@ def canvas():
     
     l = 1
     if True:
-        ax.set_xlim3d([-l, l])
-        ax.set_ylim3d([-l, l])
-        ax.set_zlim3d([-l, l])
+        ax.set_xlim3d([0, l])
+        ax.set_ylim3d([0, l])
+        ax.set_zlim3d([0, l])
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
@@ -36,7 +37,7 @@ def get_camera_pose(R,t):
 
     #https://math.stackexchange.com/questions/82602/how-to-find-camera-position-and-rotation-from-a-4x4-matrix
     # position of camera
-    cp = np.dot(R.T,t).reshape((-1))
+    cp = -np.dot(R.T,t).reshape((-1))
     # orientation of camera
     co = np.dot(R.T,(0,0,1))
     return cp, co
@@ -46,10 +47,8 @@ def cam_to_world(R,t,p):
     MV = np.hstack((R,t))
     MV = np.vstack((MV,(0,0,0,1)))
     p = np.hstack((p,1))
-    print(p)
     from numpy.linalg import inv
     p = np.dot(inv(MV),p)
-    print(p)
     p = p[:3]/p[3]
     print(p)
     return p
@@ -80,7 +79,7 @@ robot_pos = np.load('robot_arms.npy')
 #ax.scatter(j1z,j1x,j1y)
 # draw_vector(ax,joints_react[0,:],joints_react[-2,:])    
 draw_point(ax, cp, c='r')
-draw_point(ax, cp-co, c='b')
+draw_point(ax, cp+co*0.1, c='b')
 draw_point(ax, hand_left, c='y')
 draw_point(ax, hand_right, c='g')
 draw_points(ax, robot_pos[:,:3])
